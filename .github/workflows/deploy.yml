@@ -1,0 +1,64 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main  # Altere para 'master' se seu branch principal for master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Enable corepack and install pnpm
+      run: |
+        corepack enable
+        corepack prepare pnpm@latest --activate
+
+    - name: Ensure pnpm is available (fallback)
+      run: |
+        if ! command -v pnpm > /dev/null; then
+          npm install -g pnpm@latest
+        fi
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Build and export
+      # ensure the static `out/` folder exists for FTP deploy
+      run: |
+        pnpm build
+        # mkdir -p out
+        # if [ -d api ]; then
+        #   cp -R api out/
+        # fi
+        # if [ -d config ]; then
+        #   cp -R config out/
+        # fi
+        # if [ -f .htaccess ]; then
+        #   cp .htaccess out/
+        # fi
+    
+    - name: Deploy via FTP
+      uses: SamKirkland/FTP-Deploy-Action@4.3.3
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: 21
+        protocol: ftps
+        local-dir: ./out/  # Pasta local de onde os arquivos serão enviados
+        server-dir: /  # Deploy na subpasta site/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          .github/**
