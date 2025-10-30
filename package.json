@@ -1,10 +1,11 @@
 {
   "name": "ilovepomo",
-  "version": "0.1.0",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 3001",
-    "build": "next build --turbopack",
+    "generate:version": "node ./scripts/generate-version.js",
+    "build": "pnpm run generate:version && next build --turbopack",
     "start": "next start"
   },
   "dependencies": {
