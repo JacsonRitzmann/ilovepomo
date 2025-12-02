@@ -1,0 +1,22 @@
+# api/.htaccess
+
+# Bloquear acesso direto ao config.php
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Permitir apenas requisições POST para a API
+<FilesMatch "salvar-projeto.php">
+    <LimitExcept POST OPTIONS>
+        Order Allow,Deny
+        Deny from all
+    </LimitExcept>
+</FilesMatch>
+
+# Prevenir listagem de diretórios
+Options -Indexes
+
+# Proteção contra injeção de código
+php_flag display_errors Off
+php_value error_reporting 0

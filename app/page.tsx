@@ -18,6 +18,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { getPlanoById, pricePlano, isActivePlano } from "@/lib/utils";
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
@@ -42,7 +43,7 @@ export default function Home() {
     },
     {
       icon: BarChart3,
-      title: "Relatórios Detalhados",
+      title: "Relatórios Detalhados - PRO",
       description: "Analise sua produtividade com gráficos e estatísticas. Identifique padrões e melhore continuamente.",
       color: "from-green-500 to-green-600"
     },
@@ -188,15 +189,15 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               </div>
 
-              <div className="absolute -bottom-6 -right-6 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 shadow-2xl">
+              {/* <div className="absolute -bottom-6 -right-6 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 shadow-2xl">
                 <div className="flex items-center gap-3">
                   <Award className="w-8 h-8 text-white" />
                   <div>
-                    <div className="text-sm text-white/80">Escolha dos Editores</div>
-                    <div className="text-lg font-bold text-white">App do Ano</div>
+                    <div className="text-sm text-white/80">Versão PRO</div>
+                    <div className="text-lg font-bold text-white">EM BREVE</div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </motion.div>
           </div>
         </div>
@@ -369,12 +370,7 @@ export default function Home() {
                 </div>
 
                 <ul className="space-y-4 mb-8">
-                  {[
-                    "Timer Pomodoro completo",
-                    "Gestão básica de tarefas",
-                    "3 sons ambiente",
-                    "Relatórios semanais básicos",
-                  ].map((feature, index) => (
+                  {getPlanoById('gratuito')?.itensInclusos.map((feature, index) => (
                     <li key={index} className="flex items-center gap-3">
                       <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
                       <span className="text-gray-300">{feature}</span>
@@ -398,11 +394,12 @@ export default function Home() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
+              className="relative"
             >
-              <Card className="bg-gradient-to-br from-red-500/20 to-red-600/20 border-red-500/30 p-8 h-full relative overflow-hidden">
+              <Card className={`bg-gradient-to-br from-red-500/20 to-red-600/20 border-red-500/30 p-8 h-full relative overflow-hidden ${!isActivePlano('pro') ? 'blur-sm' : ''}`}>
                 <div className="absolute top-4 right-4">
-                  <Badge className="bg-red-500 text-white border-none">
-                    Mais Popular
+                  <Badge className={isActivePlano('pro') ? 'bg-red-500 text-white border-none' : 'bg-gray-500 text-white border-none'}>
+                    {isActivePlano('pro') ? 'Mais Popular' : 'Em Breve'}
                   </Badge>
                 </div>
 
@@ -410,7 +407,7 @@ export default function Home() {
                   <h3 className="text-2xl font-bold mb-2">Pro</h3>
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-5xl font-bold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
-                      R$ 19,90
+                      {pricePlano('pro', 'br')}
                     </span>
                     <span className="text-gray-400">/mês</span>
                   </div>
@@ -418,15 +415,7 @@ export default function Home() {
                 </div>
 
                 <ul className="space-y-4 mb-8">
-                  {[
-                    "Tudo do plano Free",
-                    "Mais sons ambiente ",
-                    "Relatórios avançados",
-                    "Calendário completo",
-                    "Dicas personalizadas de bem-estar",
-                    "Tema personalizável",
-                    "Suporte prioritário"
-                  ].map((feature, index) => (
+                  {getPlanoById('pro')?.itensInclusos.map((feature, index) => (
                     <li key={index} className="flex items-center gap-3">
                       <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
                       <span className="text-gray-100">{feature}</span>
@@ -438,15 +427,33 @@ export default function Home() {
                   onClick={() => scrollToSection("download")}
                   className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-none"
                   size="lg"
+                  disabled={!isActivePlano('pro')}
                 >
-                  Começar Teste Grátis
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  {isActivePlano('pro') ? (
+                    <>
+                      Começar Teste Grátis
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  ) : (
+                    'Em Breve'
+                  )}
                 </Button>
 
-                <p className="text-center text-sm text-gray-400 mt-4">
-                  7 dias grátis • Cancele quando quiser
-                </p>
+                {isActivePlano('pro') && (
+                  <p className="text-center text-sm text-gray-400 mt-4">
+                    7 dias grátis • Cancele quando quiser
+                  </p>
+                )}
               </Card>
+
+              {/* Overlay "Em Breve" em 45 graus */}
+              {!isActivePlano('pro') && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-3xl px-20 py-4 shadow-2xl transform -rotate-45">
+                    EM BREVE
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
         </div>
@@ -521,9 +528,8 @@ export default function Home() {
             <div>
               <h4 className="font-bold mb-4">Suporte</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contato</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
+                <li><a href="/ajuda" className="hover:text-white transition-colors">Central de Ajuda</a></li>
+                <li><a href="/ajuda" className="hover:text-white transition-colors">Contato</a></li>
               </ul>
             </div>
 
@@ -539,11 +545,11 @@ export default function Home() {
 
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
             <p>© 2025 I♥Pomo. Todos os direitos reservados.</p>
-            <div className="flex items-center gap-6">
+            {/* <div className="flex items-center gap-6">
               <a href="#" className="hover:text-white transition-colors">Twitter</a>
               <a href="#" className="hover:text-white transition-colors">Instagram</a>
               <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
-            </div>
+            </div> */}
           </div>
         </div>
       </footer>
